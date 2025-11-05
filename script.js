@@ -49,8 +49,13 @@
     };
   
     function setDifficulty() {
+      if (running) return; // No permitir cambiar dificultad durante la partida
       const val = diffSelect.value;
       dropInterval = DIFFICULTIES[val];
+    }
+    
+    function updateDifficultySelect() {
+      diffSelect.disabled = running;
     }
   
     function newBag(){
@@ -132,7 +137,7 @@
     const draw=()=>{drawGrid();if(current)drawPiece(current);drawNext();}
     const updateHUD=()=>{scoreEl.textContent=score;levelEl.textContent=level;linesEl.textContent=lines;}
   
-    function gameOver(){running=false;paused=false;cancelAnimationFrame(req);alert("Game Over · Score: "+score);}
+    function gameOver(){running=false;paused=false;cancelAnimationFrame(req);updateDifficultySelect();alert("Game Over · Score: "+score);}
     function update(t=0){
       if(!running)return;
       if(!lastDrop)lastDrop=t;
@@ -140,9 +145,9 @@
       draw();req=requestAnimationFrame(update);
     }
     function start(){setDifficulty();grid=makeGrid();score=0;level=1;lines=0;bag=[];next=nextPiece();spawn();
-      running=true;paused=false;updateHUD();cancelAnimationFrame(req);req=requestAnimationFrame(update);}
+      running=true;paused=false;updateHUD();updateDifficultySelect();cancelAnimationFrame(req);req=requestAnimationFrame(update);}
     function pause(){paused=!paused;pauseBtn.textContent=paused?'Resume':'Pause';}
-    function reset(){running=false;paused=false;cancelAnimationFrame(req);grid=makeGrid();score=level=lines=0;draw();updateHUD();}
+    function reset(){running=false;paused=false;cancelAnimationFrame(req);grid=makeGrid();score=level=lines=0;draw();updateHUD();updateDifficultySelect();}
   
     document.addEventListener('keydown',e=>{
       if(!running&&e.key===' ')return start();
@@ -161,7 +166,8 @@
     pauseBtn.onclick=pause;
     resetBtn.onclick=reset;
     diffSelect.onchange=setDifficulty;
-  
+
+    updateDifficultySelect(); // Inicializar el estado del select al cargar
     draw();
   })();
   
